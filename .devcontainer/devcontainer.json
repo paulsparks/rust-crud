@@ -17,9 +17,12 @@
             "path": "/bin/bash"
           }
         },
-        "terminal.integrated.defaultProfile.linux": "bash"
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "editor.tabSize": 4
       }
     }
   },
-  "forwardPorts": ["db:5432"]
+  "forwardPorts": [
+    "db:5432"
+  ]
 }
