@@ -1,4 +1,4 @@
-use self::models::*;
+use self::models::Post;
 use diesel::prelude::*;
 use rust_crud::*;
 
