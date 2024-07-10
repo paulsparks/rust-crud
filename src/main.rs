@@ -1,5 +1,8 @@
 use rust_crud::{db_operations::*, prompt_login};
-use std::io::{self, stdin};
+use std::{
+    io::{self, stdin},
+    process,
+};
 
 fn main() -> io::Result<()> {
     println!("Do you already have an account? (Y/n)");
@@ -19,7 +22,10 @@ fn main() -> io::Result<()> {
 
         let (username, password) = prompt_login()?;
 
-        user = create_user(connection, &username, &password);
+        user = create_user(connection, &username, &password).unwrap_or_else(|_| {
+            eprintln!("Error creating user. Username cannot exceed 20 characters.");
+            process::exit(1);
+        });
         println!("Created account for {}", user.username);
 
         return Ok(());

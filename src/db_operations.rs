@@ -12,7 +12,7 @@ pub fn establish_connection() -> PgConnection {
         .unwrap_or_else(|err| panic!("Database error: {}", err))
 }
 
-pub fn create_user(conn: &mut PgConnection, username: &str, password: &str) -> User {
+pub fn create_user(conn: &mut PgConnection, username: &str, password: &str) -> QueryResult<User> {
     let mut new_user = NewUser { username, password };
 
     let mut hasher = Sha256::new();
@@ -24,14 +24,9 @@ pub fn create_user(conn: &mut PgConnection, username: &str, password: &str) -> U
     diesel::insert_into(users::table)
         .values(&new_user)
         .get_result(conn)
-        .unwrap_or_else(|err| panic!("Error creating user: {}", err))
 }
 
-pub fn get_user(
-    conn: &mut PgConnection,
-    username: &str,
-    password: &str,
-) -> Result<User, diesel::result::Error> {
+pub fn get_user(conn: &mut PgConnection, username: &str, password: &str) -> QueryResult<User> {
     let mut hasher = Sha256::new();
     hasher.update(password.as_bytes());
     let password_hash = format!("{:x}", hasher.finalize());
