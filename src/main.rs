@@ -1,4 +1,4 @@
-use rust_crud::*;
+use rust_crud::{db_operations::*, prompt_login};
 use std::io::{self, stdin};
 
 fn main() -> io::Result<()> {
@@ -33,7 +33,8 @@ fn main() -> io::Result<()> {
                 user = val;
                 break;
             }
-            Err(_) => println!("\nUser not found. Try again!"),
+            Err(diesel::result::Error::NotFound) => println!("\nUser not found. Try again!"),
+            Err(_) => eprintln!("\nDatabase error"),
         }
     }
 
