@@ -10,10 +10,34 @@ fn main() -> io::Result<()> {
 
     let has_account = selection != "n";
 
+    let connection = &mut establish_connection();
+
+    let user;
+
     if !has_account {
-        println!("Enter username and password for new account:")
-    };
-    let (username, password) = prompt_login()?;
+        println!("Enter username and password for new account:");
+
+        let (username, password) = prompt_login()?;
+
+        user = create_user(connection, &username, &password);
+        println!("Created account for {}", user.username);
+
+        return Ok(());
+    }
+
+    loop {
+        let (username, password) = prompt_login()?;
+
+        match get_user(connection, &username, &password) {
+            Ok(val) => {
+                user = val;
+                break;
+            }
+            Err(_) => println!("\nUser not found. Try again!"),
+        }
+    }
+
+    println!("\nWelcome {}!", user.username);
 
     Ok(())
 }
