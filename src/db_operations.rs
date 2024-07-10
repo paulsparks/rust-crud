@@ -1,4 +1,5 @@
 use crate::models::{NewUser, User};
+use crate::schema::users;
 use diesel::prelude::*;
 use sha2::{Digest, Sha256};
 use std::env;
@@ -12,8 +13,6 @@ pub fn establish_connection() -> PgConnection {
 }
 
 pub fn create_user(conn: &mut PgConnection, username: &str, password: &str) -> User {
-    use crate::schema::users;
-
     let mut new_user = NewUser { username, password };
 
     let mut hasher = Sha256::new();
@@ -33,8 +32,6 @@ pub fn get_user(
     username: &str,
     password: &str,
 ) -> Result<User, diesel::result::Error> {
-    use crate::schema::users;
-
     let mut hasher = Sha256::new();
     hasher.update(password.as_bytes());
     let password_hash = format!("{:x}", hasher.finalize());
