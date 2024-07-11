@@ -1,8 +1,15 @@
-use actix_web::{get, post, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use tera::{Context, Tera};
 
 #[get("/")]
-async fn index() -> impl Responder {
-    HttpResponse::Ok().body("Hello, world!")
+async fn index(tera: web::Data<Tera>) -> impl Responder {
+    let mut context = Context::new();
+    context.insert("name", "Paul");
+    let page = tera
+        .render("index.html", &context)
+        .unwrap_or_else(|_| "Template rendering failed".to_string());
+
+    HttpResponse::Ok().content_type("text/html").body(page)
 }
 
 #[post("/echo")]
@@ -12,8 +19,21 @@ async fn echo(req_body: String) -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| App::new().service(index).service(echo))
-        .bind(("127.0.0.1", 8080))?
-        .run()
-        .await
+    let tera = match Tera::new("templates/**/*.html") {
+        Ok(t) => t,
+        Err(e) => {
+            eprintln!("Parsing error(s): {}", e);
+            std::process::exit(1);
+        }
+    };
+
+    HttpServer::new(move || {
+        App::new()
+            .app_data(web::Data::new(tera.clone()))
+            .service(index)
+            .service(echo)
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
 }
