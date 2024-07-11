@@ -1,5 +1,6 @@
 pub mod db_operations;
 pub mod models;
+pub mod routes;
 pub mod schema;
 use diesel::{
     prelude::*,
