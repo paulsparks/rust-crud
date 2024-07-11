@@ -1,4 +1,5 @@
-use crate::models::{NewUser, User};
+use crate::models::{NewTodoItem, NewUser, TodoItem, User};
+use crate::schema::todo_items;
 use crate::schema::users;
 use diesel::prelude::*;
 use sha2::{Digest, Sha256};
@@ -36,4 +37,16 @@ pub fn get_user(conn: &mut PgConnection, username: &str, password: &str) -> Quer
         .filter(users::password.eq(password_hash))
         .select(User::as_select())
         .first(conn)
+}
+
+pub fn create_todo_item(conn: &mut PgConnection, item: &str) -> QueryResult<TodoItem> {
+    let new_todo_item = NewTodoItem { item };
+
+    diesel::insert_into(todo_items::table)
+        .values(&new_todo_item)
+        .get_result(conn)
+}
+
+pub fn get_todo_items(conn: &mut PgConnection) -> QueryResult<Vec<TodoItem>> {
+    todo_items::table.select(TodoItem::as_select()).load(conn)
 }

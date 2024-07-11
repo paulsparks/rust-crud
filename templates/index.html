@@ -8,13 +8,15 @@
 </head>
 
 <body>
-    <Form id="todoform" action="/submit" target="_self" method="post">
+    <Form id="todoform" action="/" target="_self" method="post">
         <Label for="tditem">To-Do Item:</Label><br>
         <Input type="text" name="tditem"></Input>
         <Button type="submit" form="todoform" value="Submit">Submit</Button>
     </Form>
     <ul>
-        <li>items go here</li>
+        {% for item in items %}
+        <li>{{ item.item }}</li>
+        {% endfor %}
     </ul>
 </body>
 
