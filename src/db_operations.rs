@@ -39,12 +39,19 @@ pub fn get_user(conn: &mut PgConnection, username: &str, password: &str) -> Quer
         .first(conn)
 }
 
-pub fn create_todo_item(conn: &mut PgConnection, item: &str) -> QueryResult<TodoItem> {
+pub fn create_todo_item(conn: &mut PgConnection, item: &str) {
     let new_todo_item = NewTodoItem { item };
 
     diesel::insert_into(todo_items::table)
         .values(&new_todo_item)
-        .get_result(conn)
+        .execute(conn)
+        .expect("Error creating todo item");
+}
+
+pub fn delete_todo_item(conn: &mut PgConnection, id: i32) {
+    diesel::delete(todo_items::table.filter(todo_items::id.eq(id)))
+        .execute(conn)
+        .expect("Error deleting todo item");
 }
 
 pub fn get_todo_items(conn: &mut PgConnection) -> QueryResult<Vec<TodoItem>> {

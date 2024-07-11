@@ -1,0 +1,8 @@
+<ul>
+    {% for item in items %}
+    <li key="{{ item.id }}">
+        {{ item.item }}
+        <button hx-post="/delete/{{ item.id }}" hx-target="ul" hx-swap="outerHTML">Delete</button>
+    </li>
+    {% endfor %}
+</ul>

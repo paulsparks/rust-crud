@@ -37,7 +37,7 @@ struct FormData {
     tditem: String,
 }
 
-#[post("/")]
+#[post("/submit")]
 async fn submit(
     form: web::Form<FormData>,
     state: web::Data<ServerState>,
@@ -50,7 +50,7 @@ async fn submit(
             .get()
             .expect("Couldn't get db connection from pool");
 
-        let _ = rust_crud::db_operations::create_todo_item(&mut conn, &form.tditem);
+        rust_crud::db_operations::create_todo_item(&mut conn, &form.tditem);
         rust_crud::db_operations::get_todo_items(&mut conn).expect("Error fetching todo items")
     })
     .await?;
@@ -59,7 +59,35 @@ async fn submit(
     context.insert("items", &items);
     let page = state
         .tera
-        .render("index.html", &context)
+        .render("list.html", &context)
+        .unwrap_or_else(|_| "Template rendering failed".to_string());
+
+    Ok(HttpResponse::Ok().content_type("text/html").body(page))
+}
+
+#[post("/delete/{id}")]
+async fn delete(
+    state: web::Data<ServerState>,
+    path: web::Path<i32>,
+) -> actix_web::Result<impl Responder> {
+    let state_clone = state.clone();
+
+    let items = web::block(move || {
+        let mut conn = state_clone
+            .db_pool
+            .get()
+            .expect("Couldn't get db connection from pool");
+
+        rust_crud::db_operations::delete_todo_item(&mut conn, path.into_inner());
+        rust_crud::db_operations::get_todo_items(&mut conn).expect("Error fetching todo items")
+    })
+    .await?;
+
+    let mut context = Context::new();
+    context.insert("items", &items);
+    let page = state
+        .tera
+        .render("list.html", &context)
         .unwrap_or_else(|_| "Template rendering failed".to_string());
 
     Ok(HttpResponse::Ok().content_type("text/html").body(page))
@@ -96,6 +124,7 @@ async fn main() -> std::io::Result<()> {
             }))
             .service(index)
             .service(submit)
+            .service(delete)
             .service(echo)
     })
     .bind(("127.0.0.1", 8080))?
