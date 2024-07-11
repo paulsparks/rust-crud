@@ -1303,6 +1303,7 @@ dependencies = [
  "actix-files",
  "actix-web",
  "diesel",
+ "serde",
  "sha2",
  "tera",
 ]

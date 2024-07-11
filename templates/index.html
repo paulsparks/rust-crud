@@ -8,7 +8,14 @@
 </head>
 
 <body>
-    Hello, {{ name }}!
+    <Form id="todoform" action="/submit" target="_self" method="post">
+        <Label for="tditem">To-Do Item:</Label><br>
+        <Input type="text" name="tditem"></Input>
+        <Button type="submit" form="todoform" value="Submit">Submit</Button>
+    </Form>
+    <ul>
+        <li>items go here</li>
+    </ul>
 </body>
 
 </html>

@@ -1,8 +1,24 @@
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use serde::Deserialize;
 use tera::{Context, Tera};
 
 #[get("/")]
 async fn index(tera: web::Data<Tera>) -> impl Responder {
+    let mut context = Context::new();
+    let page = tera
+        .render("index.html", &context)
+        .unwrap_or_else(|_| "Template rendering failed".to_string());
+
+    HttpResponse::Ok().content_type("text/html").body(page)
+}
+
+#[derive(Deserialize)]
+struct FormData {
+    tditem: String,
+}
+
+#[post("/submit")]
+async fn submit(form: web::Form<FormData>, tera: web::Data<Tera>) -> impl Responder {
     let mut context = Context::new();
     context.insert("name", "Paul");
     let page = tera
@@ -31,6 +47,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(web::Data::new(tera.clone()))
             .service(index)
+            .service(submit)
             .service(echo)
     })
     .bind(("127.0.0.1", 8080))?
